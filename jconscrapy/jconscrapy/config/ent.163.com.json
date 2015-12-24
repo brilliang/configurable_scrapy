@@ -1,0 +1,110 @@
+{
+  "name": "ent.163.com",
+  "links": [
+    {
+      "type": "const",
+      "value": "http://ent.163.com/",
+      "media_type": "news",
+      "links": [
+        {
+          "type": "link_extractor",
+          "value": {"allow": "http://ent.163.com/\\d+/\\d+/\\d+/[0-9a-zA-Z]+.html"},
+          "doc": "main",
+          "items": {
+            "type": {
+              "type": "const",
+              "value": "main"
+            },
+            "title": {
+              "type": "xpath",
+              "value": "//title/text()"
+            },
+            "content": {
+              "type": "xpath",
+              "value": "//div[@id='endText']"
+            },
+            "subtitle": {
+              "type": "xpath",
+              "value": ""
+            },
+            "crumb": {
+              "type": "xpath",
+              "value": "//div[@class='ep-crumb JS_NTES_LOG_FE']"
+            },
+            "abstraction": {
+              "type": "xpath",
+              "value": "//p[@class='ep-summary']/text()"
+            },
+            "description": {
+              "type": "xpath",
+              "value": "//meta[@name='description']/@content"
+            },
+            "author": {
+              "type": "xpath",
+              "value": "//div[@class='ep-time-soure cDGray']/a/text()"
+            },
+            "source_name": {
+              "type": "xpath",
+              "value": "//div[@class='ep-time-soure cDGray']/a/text()"
+            },
+            "source_url": {
+              "type": "xpath",
+              "value": "//div[@class='ep-time-soure cDGray']/a/@href"
+            },
+            "image_urls":{
+              "type": "xpath",
+              "list": true,
+              "value": "//p[@class='f_center']/img/@src"
+            },
+            "pub_time": {
+              "type": "xpath_reg",
+              "value": [
+                "//div[@class='ep-time-soure cDGray']/text()",
+                "(\\d+-\\d+-\\d+ \\d\\d:\\d\\d:\\d\\d)"
+              ],
+              "format": "timestamp"
+            },
+            "comment_count": {
+              "type": "const",
+              "value": 0
+            },
+            "other_list": {
+              "type": "xpath",
+              "value": "//div[@class='ep-keywords-main']"
+            }
+          },
+          "links": [
+            {
+              "type": "reg_url",
+              "doc": "comment",
+              "value": [
+                "@url",
+                "/(\\w+)\\.html",
+                "http://comment.ent.163.com/cache/newlist/ent2_bbs/{1}_1.html"
+              ],
+              "items": {
+                "id":{
+                  "type": "from_url",
+                  "value": "(\\d+)\\.html"
+                },
+                "comment": {
+                  "type": "jsonp",
+                  "value": ""
+                }
+              },
+              "page_link": {
+                "type": "reg_url",
+                "value": [
+                  "@url",
+                  "(.+?)_(\\d+)\\.html",
+                  "{1}_$({2}+1).html",
+                  {"length": 100}
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

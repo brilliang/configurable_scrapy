@@ -1,0 +1,81 @@
+{
+  "name": "youku.com",
+  "media_type": "video",
+  "links": [
+    {
+      "type": "const",
+      "value": "http://www.youku.com/",
+      "links": [
+        {
+          "type": "const",
+          "value": "http://v.youku.com/v_show/id_XODc2MTI1MDky_ev_2.html",
+          "item": {
+            "videoid": {
+              "type": "xpath_reg",
+              "value": [
+                "//head",
+                "\\svideoId\\s?=\\s?['\"](\\d+)['\"]"
+              ]
+            },
+            "showid": {
+              "type": "xpath_reg",
+              "value": [
+                "//head",
+                "\\sshowid\\s?=\\s?['\"](\\d+)['\"]"
+              ]
+            },
+            "title": {
+              "type": "xpath",
+              "value": "//title/text()"
+            },
+            "crumbs": {
+              "type": "xpath",
+              "value": "//div[@class='crumbs']/a/text()"
+            },
+            "keywords": {
+              "type": "xpath",
+              "value": "//meta[@name='keywords']/@content"
+            },
+            "description": {
+              "type": "xpath",
+              "value": "//meta[@name='description']/@content"
+            },
+            "text_short": {
+              "type": "xpath",
+              "value": "//div[@id='text_short']//text()"
+            },
+            "username": {
+              "type": "xpath",
+              "value": "//div[@class='userInfo']/div[@class='bar']/a/text()"
+            },
+            "release_time": {
+              "type": "xpath",
+              "value": "//div[@class='commentcon']/div[@class='con']/div[@class='panel']/span[@class='timestamp']/text()"
+            },
+
+            "play_time": {
+              "type": "xpath",
+              "value": "//div[@id='videodetailInfo']//span[@class='num']/text()"
+            },
+            "down_time": {
+              "type": "xpath",
+              "value": "//span[@id='downVideoTimes']/text()"
+            },
+            "up_time": {
+              "type": "xpath",
+              "value": "//span[@id='upVideoTimes']/text()"
+            },
+            "comment_num": {
+              "type": "xpath",
+              "value": ""
+            },
+            "comment_content": {
+              "type": "xpath",
+              "value": ""
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
