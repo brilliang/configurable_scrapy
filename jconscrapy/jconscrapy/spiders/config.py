@@ -2,9 +2,12 @@
 
 import json
 import codecs
+import logging
 
-from ycrawler.spiders.conf_validate import validate_conf
-from ycrawler.spiders.extractor import *
+from jconscrapy.spiders.conf_validate import validate_conf
+from jconscrapy.spiders.extractor import ItemExtractor, FLinksExtractor
+
+import constants
 
 
 class FocusedCrawlerConfigure:
@@ -27,7 +30,7 @@ class FocusedCrawlerConfigure:
                            default=lambda x: repr(x) if isinstance(x, BaseExtractor) else x)
         )
         print log_msg_str
-        log.msg(log_msg_str, log.INFO)
+        logging.info(log_msg_str)
 
     @property
     def config(self):
@@ -71,15 +74,15 @@ def _read_conf_file(config_file):
         try:
             return json.load(f, "utf8")
         except:
-            log.msg("json load configuration file error.", log.ERROR)
+            logging.exception("json load configuration file error.")
             raise
 
 
 if __name__ == '__main__':
-    conf_path = "/Users/zhuliang/work/cuc/spider/crawlers/ycrawler/ycrawler/config/ent.qq.com.json.valid"
+    conf_path = "/Users/zhuliang/work/cuc/spider/crawlers/ycrawler/ycrawler/configs/ent.qq.com.json.valid"
     config = FocusedCrawlerConfigure(None, conf_path).config
 
-    # print json.dumps(config,
+    # print json.dumps(configs,
     # ensure_ascii=True,
     # indent=4,
     # default=DEFAULT_JSON_DECODER)

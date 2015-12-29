@@ -4,13 +4,11 @@
     {
       "type": "const",
       "value": "http://ent.163.com/",
-      "media_type": "news",
       "links": [
         {
           "type": "link_extractor",
           "value": {"allow": "http://ent.163.com/\\d+/\\d+/\\d+/[0-9a-zA-Z]+.html"},
-          "doc": "main",
-          "items": {
+          "item": {
             "type": {
               "type": "const",
               "value": "main"
@@ -53,8 +51,8 @@
             },
             "image_urls":{
               "type": "xpath",
-              "list": true,
-              "value": "//p[@class='f_center']/img/@src"
+              "value": "//p[@class='f_center']/img/@src",
+              "format":"list"
             },
             "pub_time": {
               "type": "xpath_reg",
@@ -64,45 +62,11 @@
               ],
               "format": "timestamp"
             },
-            "comment_count": {
-              "type": "const",
-              "value": 0
-            },
             "other_list": {
               "type": "xpath",
               "value": "//div[@class='ep-keywords-main']"
             }
-          },
-          "links": [
-            {
-              "type": "reg_url",
-              "doc": "comment",
-              "value": [
-                "@url",
-                "/(\\w+)\\.html",
-                "http://comment.ent.163.com/cache/newlist/ent2_bbs/{1}_1.html"
-              ],
-              "items": {
-                "id":{
-                  "type": "from_url",
-                  "value": "(\\d+)\\.html"
-                },
-                "comment": {
-                  "type": "jsonp",
-                  "value": ""
-                }
-              },
-              "page_link": {
-                "type": "reg_url",
-                "value": [
-                  "@url",
-                  "(.+?)_(\\d+)\\.html",
-                  "{1}_$({2}+1).html",
-                  {"length": 100}
-                ]
-              }
-            }
-          ]
+          }
         }
       ]
     }

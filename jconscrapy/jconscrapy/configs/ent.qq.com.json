@@ -1,6 +1,5 @@
 {
   "name": "ent.qq.com",
-  "media_type": "news",
   "links": [
     {
       "type": "const_list",
@@ -12,21 +11,13 @@
         {
           "type": "const",
           "value": "http://ent.qq.com/c/mxzx_1.htm",
-          "page_link": {
-            "type": "reg_url",
-            "value": [
-              "@url",
-              "mxzx\\_(\\d+)\\.",
-              "http://ent.qq.com/c/mxzx_$({1}+1).htm",
-              {"length": 100}
-            ]
-          },
           "links": [
             {
               "type": "link_extractor",
-              "doc": "main",
-              "value": {"allow": "http://ent.qq.com/a/\\d+/\\d+.htm"},
-              "items": {
+              "value": {
+                "allow": "http://ent.qq.com/a/\\d+/\\d+.htm"
+              },
+              "item": {
                 "type": {
                   "type": "const",
                   "value": "main"
@@ -92,9 +83,8 @@
               "links": [
                 {
                   "type": "meta_replace",
-                  "doc": "comment",
                   "value": "http://coral.qq.com/article/{articleid}/comment?commentid=0&reqnum=50&tag=&callback=mainComment",
-                  "items": {
+                  "item": {
                     "id": {
                       "type": "const",
                       "value": "0"

@@ -4,33 +4,28 @@ import time
 import hashlib
 import urllib
 
-from scrapy import log
-from scrapy.item import Item
 from scrapy.http import Request
 from scrapy.spider import Spider
 from scrapy.utils.response import get_base_url
 from urlparse import urljoin
 
-from ycrawler.spiders.constants import *
-from ycrawler.spiders.config import FocusedCrawlerConfigure
-from ycrawler.urlfilter.urldup import is_dup
-import pdb
+from constants import *
+from jconscrapy.items import JconscrapyItem
+from jconscrapy.spiders.config import FocusedCrawlerConfigure
 
-class DropletSpider(Spider):
+class ConfigurableSpider(Spider):
     """
     一个可以根据约定的网络结构配置文件，遍历页面的spider
     how to run:
-    cd xxx/ycrawler/ycrawler
-    scrapy crawl droplet -a config= -a config_file=config/ent.163.com.json
+    scrapy crawl confspider -a configs= -a config_file=configs/ent.163.com.json
 
     使用scrapyd的时候，从第一个参数传入配置；测试配置文件时，可从第二个参数传入配置文件地址。
     """
-    name = 'droplet'
+    name = 'confspider'
 
-    def __init__(self, config, **kwargs):
+    def __init__(self, config, config_file, **kwargs):
         Spider.__init__(self, **kwargs)
-        self.config_file = kwargs.get('config_file')
-        self.config = FocusedCrawlerConfigure(config, self.config_file).config
+        self.config = FocusedCrawlerConfigure(config, config_file).config
 
     def start_requests(self):
         """
@@ -61,7 +56,7 @@ class DropletSpider(Spider):
         item = make_item(response, conf_link)
         if item:
             response.meta[META_ITEM] = item
-            yield DropletItem(item, self)
+            yield JconscrapyItem(item, self)
 
         # 处理翻页链接
         if PAGE_LINK in conf_link:
@@ -135,22 +130,3 @@ def gen_id(url):
 
 def qualify_link(response, link):
     return urljoin(get_base_url(response), link)
-
-
-class DropletItem(Item):
-    """ 为了动态构造 scrapy item 用的辅助类 """
-
-    def __setitem__(self, key, value):
-        self._values[key] = value
-        self.fields[key] = {}
-
-    def __init__(self, items, spider):
-        Item.__init__(self)
-        for k, v in items.items():
-            self[k] = v
-
-        self[SPIDER] = {'name': spider.name,
-                        'cfg': spider.config_file,
-                        'ctime': int(time.time()),
-                        'site': spider.config.get('name'),
-                        'media_type': spider.config.get(MEDIA_TYPE)}

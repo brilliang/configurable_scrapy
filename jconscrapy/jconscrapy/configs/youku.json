@@ -1,6 +1,5 @@
 {
   "name": "youku.com",
-  "media_type": "video",
   "links": [
     {
       "type": "const",
