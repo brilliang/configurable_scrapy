@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: UTF8 -*-
 
+import json
+import codecs
 from jsonschema import validate
 
 # define some basic and often used data type.
@@ -63,12 +65,20 @@ conf_schema = {
     "additionalProperties": False
 }
 
+
+def validate_conf(conf_content):
+    validate(conf_content, conf_schema)
+
+
+def validate_conf_file(conf_file):
+    with codecs.open(conf_file, 'r', 'utf8') as f:
+        validate(json.load(f), conf_schema)
+
+
 if __name__ == '__main__':
-    import os, codecs, json
+    import os
 
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     conf_file = os.path.join(cur_dir,
                              "../configs/youku.json")
-    with codecs.open(conf_file, 'r', 'utf8') as f:
-        data = json.load(f)
-    validate(data, conf_schema)
+    validate_conf_file(conf_file)

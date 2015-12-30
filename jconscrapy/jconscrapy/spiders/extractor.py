@@ -1,10 +1,12 @@
 # coding: utf8
 
-from scrapy import log
-from scrapy.contrib.linkextractors.lxmlhtml import LxmlLinkExtractor
+import logging
 
-from ycrawler.spiders import constants
+from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 
+import constants
+
+logger = logging.getLogger(__name__)
 
 class BaseExtractor(object):
     def __init__(self, etype, value, others=None):
@@ -22,7 +24,7 @@ class BaseExtractor(object):
         try:
             extr = getattr(self, self.extractor_type)(response)
         except:
-            log.msg("extractor {0} error".format(self.value), logLevel=Exception)
+            logger.exception("extractor {0} error".format(self.value))
             return []
 
         return filter(lambda x: self.filter(x) is not None, extr)
@@ -41,7 +43,7 @@ class BaseExtractor(object):
         try:
             return [x.strip() for x in response.xpath(self.value).extract()]
         except:
-            log.msg('valid xpath value:%s' % (self.value,), log.ERROR)
+            logger.exception('valid xpath value:%s' % (self.value,))
             raise
 
 
@@ -56,7 +58,7 @@ class ItemExtractor(BaseExtractor):
             result = response.xpath(xpath).extract()
             return [result[n]] if len(result) >= n else []
         except:
-            log.msg('valid xpath n value:%s %d' % (xpath, n), log.ERROR)
+            logger.exception('valid xpath n value:%s %d' % (xpath, n))
             raise
 
     def xpath_reg(self, response):
@@ -66,7 +68,7 @@ class ItemExtractor(BaseExtractor):
         try:
             return response.xpath(self.value[0]).re(self.value[1])
         except:
-            log.msg('valid xpath-re value:%s' % (self.value,), log.ERROR)
+            logger.exception('valid xpath-re value:%s' % (self.value,))
             raise
 
 

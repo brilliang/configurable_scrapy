@@ -11,21 +11,15 @@ from urlparse import urljoin
 
 from constants import *
 from jconscrapy.items import JconscrapyItem
-from jconscrapy.spiders.config import FocusedCrawlerConfigure
+from jconscrapy.spiders.config import ConfigurableCrawlerConfigure
 
 class ConfigurableSpider(Spider):
-    """
-    一个可以根据约定的网络结构配置文件，遍历页面的spider
-    how to run:
-    scrapy crawl confspider -a configs= -a config_file=configs/ent.163.com.json
 
-    使用scrapyd的时候，从第一个参数传入配置；测试配置文件时，可从第二个参数传入配置文件地址。
-    """
     name = 'confspider'
 
     def __init__(self, config, config_file, **kwargs):
-        Spider.__init__(self, **kwargs)
-        self.config = FocusedCrawlerConfigure(config, config_file).config
+        super(Spider, self).__init__(**kwargs)
+        self.config = ConfigurableCrawlerConfigure(config, config_file).config
 
     def start_requests(self):
         """

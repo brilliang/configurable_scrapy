@@ -2,35 +2,39 @@
 
 import json
 import codecs
-import logging
 
-from jconscrapy.spiders.conf_validate import validate_conf
-from jconscrapy.spiders.extractor import ItemExtractor, FLinksExtractor
+from jconscrapy.common_utils import getLogger
 
-import constants
+from extractor import BaseExtractor, ItemExtractor, FLinksExtractor
+from config_json_schema import validate_conf
+from constants import *
+
+logger = getLogger(__name__)
 
 
-class FocusedCrawlerConfigure:
+class ConfigurableCrawlerConfigure:
     _config = {}
 
     def __init__(self, config_string, config_file):
         """
         优先使用已解析成json的配置；否则根据文件地址读取配置
         """
-        self._config = json.loads(config_string, 'utf8') \
-            if config_string else _read_conf_file(config_file)
-        validate_conf(self._config)
-        self.parse(self._config.get(constants.LINKS))
 
-        log_msg_str = "load the conf from {cf} OK! the job is \n{job}".format(
-            cf=config_file if not config_string else "json string",
-            job=json.dumps(self._config,
+        self._config = config_string
+        if self._config:
+            logger.info("load conf from json string")
+        else:
+            with codecs.open(config_file, 'r', 'utf8') as f:
+                self._config = json.load(f)
+                logger.info("load conf from %s" % config_file)
+
+        validate_conf(self._config)
+        self.parse(self._config.get(LINKS))
+
+        logger.debug(json.dumps(self._config,
                            ensure_ascii=True,
                            indent=4,
-                           default=lambda x: repr(x) if isinstance(x, BaseExtractor) else x)
-        )
-        print log_msg_str
-        logging.info(log_msg_str)
+                           default=lambda x: repr(x) if isinstance(x, BaseExtractor) else x))
 
     @property
     def config(self):
@@ -38,51 +42,41 @@ class FocusedCrawlerConfigure:
 
     def parse(self, links):
         """
-        将配置中的extractor构造出来，可在解析过程中重用而非重复创建
+        将配置中的extractor提前构造出来，可在解析过程中重用而非重复创建
         """
 
         def _param(_cur_conf):
-            return _cur_conf.get(constants.TYPE), \
-                   _cur_conf.get(constants.VALUE), \
+            return _cur_conf.get(TYPE), \
+                   _cur_conf.get(VALUE), \
                    _cur_conf
 
         for link in links:
             # 从上一级页面中抽取网页链接的配置
-            # print len(_param(link))
-            # exit(1)
-            link[constants.EXTRACTOR] = FLinksExtractor(*_param(link))
+            link[EXTRACTOR] = FLinksExtractor(*_param(link))
 
             # 在当前页面中item的配置
-            item = link.get(constants.ITEM)
+            item = link.get(ITEM)
             if item:
                 for k, v in item.items():
-                    link[constants.ITEM][k][constants.EXTRACTOR] = ItemExtractor(*_param(v))
+                    link[ITEM][k][EXTRACTOR] = ItemExtractor(*_param(v))
 
             # 在当前页面中抽取翻页链接的配置
+            # TODO add page link next time
             # TODO no more page link ???
-            page_link = link.get(constants.PAGE_LINK)
-            if page_link:
-                link[constants.PAGE_LINK][constants.EXTRACTOR] = FLinksExtractor(page_link)
+            # page_link = link.get(PAGE_LINK)
+            # if page_link:
+            #     link[PAGE_LINK][EXTRACTOR] = FLinksExtractor(page_link)
 
-            # 在当前页面中抽取网页链接的配置
-            if link.get(constants.LINKS):
-                self.parse(link[constants.LINKS])
-
-
-def _read_conf_file(config_file):
-    with codecs.open(config_file, "r", "utf8") as f:
-        try:
-            return json.load(f, "utf8")
-        except:
-            logging.exception("json load configuration file error.")
-            raise
+            # 下一级链接的配置
+            if link.get(LINKS):
+                self.parse(link[LINKS])
 
 
 if __name__ == '__main__':
-    conf_path = "/Users/zhuliang/work/cuc/spider/crawlers/ycrawler/ycrawler/configs/ent.qq.com.json.valid"
-    config = FocusedCrawlerConfigure(None, conf_path).config
+    import os
 
-    # print json.dumps(configs,
-    # ensure_ascii=True,
-    # indent=4,
-    # default=DEFAULT_JSON_DECODER)
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    conf_file = os.path.join(cur_dir,
+                             "../configs/youku.json")
+    conf = ConfigurableCrawlerConfigure(config_string="", config_file=conf_file)
+
