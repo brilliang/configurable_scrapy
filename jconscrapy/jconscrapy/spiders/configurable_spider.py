@@ -9,29 +9,33 @@ from scrapy.spider import Spider
 from scrapy.utils.response import get_base_url
 from urlparse import urljoin
 
+from config import ConfigurableCrawlerConfigure
 from constants import *
 from jconscrapy.items import JconscrapyItem
-from jconscrapy.spiders.config import ConfigurableCrawlerConfigure
+from jconscrapy.common_utils import getLogger
+
+logger = getLogger(__name__)
+
 
 class ConfigurableSpider(Spider):
-
     name = 'confspider'
 
     def __init__(self, config, config_file, **kwargs):
         super(Spider, self).__init__(**kwargs)
         self.config = ConfigurableCrawlerConfigure(config, config_file).config
+        self.conf_name = self.config[NAME]
 
     def start_requests(self):
         """
         start job from here
         """
-        conf_links = self.config[LINKS]
-        for conf_link in conf_links:
+        for conf_link in self.config[LINKS]:
             meta = {
                 META_LINK: conf_link,
                 META_ITEM: {}
             }
             for url in conf_link[EXTRACTOR].extract(None):
+                print url
                 yield Request(url=url, meta=meta, callback=self.traversal)
 
     def traversal(self, response):
@@ -50,12 +54,15 @@ class ConfigurableSpider(Spider):
         item = make_item(response, conf_link)
         if item:
             response.meta[META_ITEM] = item
+            # todo yield when no deeper links found!
             yield JconscrapyItem(item, self)
 
-        # 处理翻页链接
+        # 处理翻页链接，反正现在也没有PAGE_LINK
+        # TODO add it next version
         if PAGE_LINK in conf_link:
             for url in conf_link[PAGE_LINK][EXTRACTOR].extract(response):
                 url = qualify_link(response, url)
+                logger.info("get page link, url=", url)
                 yield Request(url=url,
                               meta={META_LINK: conf_link, META_ITEM: item},
                               callback=self.traversal)
@@ -63,26 +70,37 @@ class ConfigurableSpider(Spider):
         # 遍历下一级
         if LINKS in conf_link:
             for child_link in conf_link[LINKS]:
-                has_item = child_link.get(ITEM)
+                # has_item = child_link.get(ITEM) # todo 忘了为啥了……
+                # if has_item:
+                #     continue
                 for url in child_link[EXTRACTOR].extract(response):
                     url = qualify_link(response, url)
-                    if has_item and is_dup(url):
-                        log.msg("url duplication: %s" %(url,), logLevel=log.INFO)
+                    if is_dup(url):
+                        logger.debug("url duplication: ", url)
                         continue
 
                     rel_url = None
-                    if child_link.get(RENDER):
-                        rel_url = url
-                        url = WEBDRIVER_PROXY + urllib.quote_plus(url)
+                    # todo: specialized server for rendering javascript
+                    # if child_link.get(RENDER):
+                    #     rel_url = url
+                    #     url = WEBDRIVER_PROXY + urllib.quote_plus(url)
                     yield Request(url=url,
                                   meta={META_LINK: child_link, META_ITEM: item, URL: rel_url},
                                   callback=self.traversal)
 
 
+def is_dup(url):
+    """
+    在同一个scrapy进程中，有相同url去重机制
+    """
+    # todo 如何在多次启动、分布式运行的场景下去重和更新URL？
+    return False
+
+
 def make_item(response, conf_link):
     """ 抽取item """
     if ITEM not in conf_link:
-        return {}
+        return None
 
     rel_url = response.meta.get(URL)
     if rel_url:
@@ -93,13 +111,16 @@ def make_item(response, conf_link):
         TYPE: conf_link[DOC] if DOC in conf_link else ITEM_MAIN,
     }
 
-    item.update(response.meta.get(META_ITEM, {}))
-    item.update({k: v[EXTRACTOR].extract(response) if v.get(LIST)
-                    else ' '.join(v[EXTRACTOR].extract(response))
-                 for k, v in conf_link[ITEM].items()})
+    if META_ITEM in response.meta and \
+        response.meta[META_ITEM]:
+        # todo why META_ITEM could be None?
+        item.update(response.meta[META_ITEM])
+
+    # format in extractor
+    item.update({k: v[EXTRACTOR].extract_item(response) for k, v in conf_link[ITEM].items()})
 
     if not item.get('content'):  # content字段为空：配置的模板没有在response.body上命中
-        log.msg("item content missed. ", logLevel=log.WARNING)
+        logger.warning("item content missed. url=", response.url)
         # item['body'] = ''.join(response.xpath('//body').extract())
     if 'image_urls' in item:
         item['image_urls'] = [qualify_link(response, url) for url in item['image_urls']]
@@ -108,19 +129,23 @@ def make_item(response, conf_link):
 
 
 def add_merge_info(response, conf_link, item):
-    if DOC not in item or conf_link[DOC] == ITEM_MAIN:     # main doc
+    """
+    合并分页、多次渲染得到的数据
+    """
+    if DOC not in item or conf_link[DOC] == ITEM_MAIN:  # main doc
         item[ITEM_ID] = gen_id(response.url)
         return item
     elif ITEM_ID in response.meta[META_ITEM]:
         doc_id = response.meta[META_ITEM][ITEM_ID]
         return {ITEM_ID: doc_id, conf_link[DOC]: item}
     else:
-        log.msg("no doc_id found!", logLevel=log.ERROR)
+        logger.error("no doc_id found!")
 
 
 def gen_id(url):
     url += str(time.time())
     return hashlib.md5(url).hexdigest()
+
 
 def qualify_link(response, link):
     return urljoin(get_base_url(response), link)

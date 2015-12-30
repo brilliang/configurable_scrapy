@@ -1,5 +1,6 @@
 # coding: utf8
 
+NAME="name"
 TYPE = 'type'
 VALUE = 'value'
 LINKS = 'links'
@@ -21,3 +22,4 @@ META_ITEM = '_meta_item'
 REFER_URL = '_refer_url'
 SPIDER = '_spider'
 LIST = 'list'
+TIMESTAMP = 'timestamp'

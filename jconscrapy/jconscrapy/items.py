@@ -24,8 +24,8 @@ class JconscrapyItem(scrapy.Item):
         for k, v in items.items():
             self[k] = v
 
-        self[SPIDER] = {'name': spider.name,
-                        'cfg': spider.config_file,
-                        'ctime': int(time.time()),
-                        'site': spider.config.get('name'),
-                        'media_type': spider.config.get(MEDIA_TYPE)}
+        self[SPIDER] = {
+            'name': spider.name,
+            'site': spider.conf_name,
+            'ctime': int(time.time()),
+        }

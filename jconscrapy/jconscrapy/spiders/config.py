@@ -21,6 +21,8 @@ class ConfigurableCrawlerConfigure:
         """
 
         self._config = config_string
+        self._config_file = config_file
+
         if self._config:
             logger.info("load conf from json string")
         else:

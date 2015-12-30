@@ -1,12 +1,12 @@
 # coding: utf8
 
-import logging
-
+import json
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 
 import constants
+from jconscrapy.common_utils import getLogger
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 class BaseExtractor(object):
     def __init__(self, etype, value, others=None):
@@ -27,14 +27,13 @@ class BaseExtractor(object):
             logger.exception("extractor {0} error".format(self.value))
             return []
 
-        return filter(lambda x: self.filter(x) is not None, extr)
+        return filter(lambda x: self.filter(x), extr)
 
     def const(self, response):
         return [self.value]
 
     def filter(self, one):
-        if one:
-            return one
+        return bool(one)
 
     def xpath(self, response):
         """
@@ -43,11 +42,24 @@ class BaseExtractor(object):
         try:
             return [x.strip() for x in response.xpath(self.value).extract()]
         except:
-            logger.exception('valid xpath value:%s' % (self.value,))
+            logger.error('valid xpath value:%s' % (self.value,))
             raise
 
 
 class ItemExtractor(BaseExtractor):
+
+    def extract_item(self, response):
+        rst = self.extract(response)
+        if constants.FORMAT not in self.vars:
+            return ' '.join(rst)
+        elif self.vars[constants.FORMAT] == constants.LIST:
+            return rst
+        elif self.vars[constants.FORMAT] == constants.TIMESTAMP:
+            # todo timestamp parse
+            return ' '.join(rst)
+        else:
+            raise Exception('format %s not supported.' % self.vars[constants.FORMAT])
+
     def xpath_n(self, response):
         """
         抽取命中xpath后的第n个元素
@@ -58,7 +70,7 @@ class ItemExtractor(BaseExtractor):
             result = response.xpath(xpath).extract()
             return [result[n]] if len(result) >= n else []
         except:
-            logger.exception('valid xpath n value:%s %d' % (xpath, n))
+            logger.error('valid xpath n value:%s %d' % (xpath, n))
             raise
 
     def xpath_reg(self, response):
@@ -68,7 +80,7 @@ class ItemExtractor(BaseExtractor):
         try:
             return response.xpath(self.value[0]).re(self.value[1])
         except:
-            logger.exception('valid xpath-re value:%s' % (self.value,))
+            logger.error('valid xpath-re value:%s' % (self.value,))
             raise
 
 
