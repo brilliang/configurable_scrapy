@@ -9,7 +9,7 @@ from scrapy.spider import Spider
 from scrapy.utils.response import get_base_url
 from urlparse import urljoin
 
-from config import ConfigurableCrawlerConfigure
+from crawler_config import CrawlerConfigure
 from constants import *
 from jconscrapy.items import JconscrapyItem
 from jconscrapy.common_utils import getLogger
@@ -22,7 +22,7 @@ class ConfigurableSpider(Spider):
 
     def __init__(self, config, config_file, **kwargs):
         super(Spider, self).__init__(**kwargs)
-        self.config = ConfigurableCrawlerConfigure(config, config_file).config
+        self.config = CrawlerConfigure(config, config_file).config
         self.conf_name = self.config[NAME]
 
     def start_requests(self):
@@ -70,7 +70,7 @@ class ConfigurableSpider(Spider):
         # 遍历下一级
         if LINKS in conf_link:
             for child_link in conf_link[LINKS]:
-                # has_item = child_link.get(ITEM) # todo 忘了为啥了……
+                # has_item = child_link.get(ITEM) # todo 忘了为啥要这样……
                 # if has_item:
                 #     continue
                 for url in child_link[EXTRACTOR].extract(response):

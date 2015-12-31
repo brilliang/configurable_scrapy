@@ -12,7 +12,7 @@ from constants import *
 logger = getLogger(__name__)
 
 
-class ConfigurableCrawlerConfigure:
+class CrawlerConfigure:
     _config = {}
 
     def __init__(self, config_string, config_file):
@@ -80,5 +80,5 @@ if __name__ == '__main__':
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     conf_file = os.path.join(cur_dir,
                              "../configs/youku.json")
-    conf = ConfigurableCrawlerConfigure(config_string="", config_file=conf_file)
+    conf = CrawlerConfigure(config_string="", config_file=conf_file)
 
