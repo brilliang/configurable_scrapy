@@ -19,3 +19,14 @@ TELNETCONSOLE_ENABLED = False
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
 
 DOWNLOAD_DELAY = 1.0
+
+
+# todo:
+# download middleware:
+# 1. url de-duplicate, even in distributed environment
+# 2. url translate for javascript rendering
+#
+
+# todo:
+# item pipelines:
+# 1. image & file url translate

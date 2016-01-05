@@ -16,6 +16,7 @@ item_schema = {
     "type": "object",
     "patternProperties": {
         "[_a-zA-Z]\\w*": {
+            "required": ["type", "value"],
             "properties": {
                 "type": str_type,
                 "value": {
@@ -25,8 +26,7 @@ item_schema = {
                     ]
                 },
                 "format": str_type,
-            },
-            "required": ["type", "value"]
+            }
         }
     }
 }
@@ -34,11 +34,15 @@ item_schema = {
 conf_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "additionalProperties": False,
+    "required": ["name", "links"],
     "properties": {
         "name": str_type,
         "links": {
             "type": "array",
             "items": {
+                "required": ["type", "value"],
+                "additionalProperties": False,
                 "properties": {
                     "type": str_type,
                     "value": {
@@ -56,13 +60,10 @@ conf_schema = {
                     "links": {
                         "$ref": "#/properties/links"
                     }
-                },
-                "required": ["type", "value"],
-                "additionalProperties": False
+                }
             }
         }
-    },
-    "additionalProperties": False
+    }
 }
 
 
