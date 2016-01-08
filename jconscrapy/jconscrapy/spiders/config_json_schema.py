@@ -31,6 +31,22 @@ item_schema = {
     }
 }
 
+render_schema = {
+    "type": "array",
+    "items": {
+        "properties": {
+            "js": str_type,
+            "wait": {
+                "type": "object",
+                "properties": {
+                    "cssSelector": str_type,
+                    "xpath": str_type
+                }
+            }
+        }
+    }
+}
+
 conf_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -56,6 +72,7 @@ conf_schema = {
                              }}
                         ]
                     },
+                    "render": render_schema,
                     "item": item_schema,
                     "links": {
                         "$ref": "#/properties/links"

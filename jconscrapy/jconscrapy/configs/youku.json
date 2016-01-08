@@ -8,6 +8,14 @@
         {
           "type": "const",
           "value": "http://v.youku.com/v_show/id_XODc2MTI1MDky_ev_2.html",
+          "render": [
+            {
+              "js": "window.scrollTo(0,document.body.scrollHeight);",
+              "wait": {
+                "cssSelector":"#Comments"
+              }
+            }
+          ],
           "item": {
             "videoid": {
               "type": "xpath_reg",
@@ -51,7 +59,6 @@
               "type": "xpath",
               "value": "//div[@class='commentcon']/div[@class='con']/div[@class='panel']/span[@class='timestamp']/text()"
             },
-
             "play_time": {
               "type": "xpath",
               "value": "//div[@id='videodetailInfo']//span[@class='num']/text()"
@@ -66,11 +73,7 @@
             },
             "comment_num": {
               "type": "xpath",
-              "value": ""
-            },
-            "comment_content": {
-              "type": "xpath",
-              "value": ""
+              "value": "//em[@id='allnum_cmt']/text()"
             }
           }
         }
